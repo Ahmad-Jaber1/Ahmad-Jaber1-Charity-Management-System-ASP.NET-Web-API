@@ -1,0 +1,32 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+
+# Publish outputs
+*.log
+*.cache
+*.pdb
+*.exe
+*.dll
+
+# Rider/IDE files (إذا استخدمت JetBrains أيضاً)
+.idea/
+
+# OS generated files
+Thumbs.db
+*.DS_Store
+
+# Sensitive configuration files
+appsettings.json
+appsettings.Development.json
+secrets.json
+
+Uploads/
+Properties/
