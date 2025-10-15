@@ -67,9 +67,7 @@ A backend API for managing charity operations, including assistance types, benef
 Contributions, issues, and feature requests are welcome!  
 Feel free to check the [issues page](https://github.com/Ahmad-Jaber1/Ahmad-Jaber1-Charity-Management-System-ASP.NET-Web-API/issues).
 
-## License
 
-**Note:** *No license file is currently included. Please add one (MIT, Apache, etc.) to clarify usage.*
 
 ## Author
 
