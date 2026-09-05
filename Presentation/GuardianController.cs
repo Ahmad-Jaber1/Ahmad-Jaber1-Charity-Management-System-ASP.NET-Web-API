@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Models.DTO;
@@ -52,8 +52,26 @@ namespace Presentation
 		[HttpPost]
 		public async Task<IActionResult> AddGuardian(Guardian guardian)
 		{
-			await _guardianService.AddGuardianAsync(guardian);
-			return Ok();
+			if (string.IsNullOrWhiteSpace(guardian.GuardianId))
+			{
+				return BadRequest("يرجى إدخال الرقم الوطني للوصي.");
+			}
+
+			var existing = await _guardianService.GetGuardianByIdAsync(guardian.GuardianId);
+			if (existing != null)
+			{
+				return BadRequest("الرقم الوطني للوصي مسجل مسبقاً في النظام.");
+			}
+
+			try
+			{
+				await _guardianService.AddGuardianAsync(guardian);
+				return Ok(new { guardianId = guardian.GuardianId });
+			}
+			catch (Exception)
+			{
+				return BadRequest("تعذر حفظ بيانات الوصي. يرجى التأكد من عدم تكرار الرقم الوطني وصحة البيانات.");
+			}
 		}
 
 		[HttpPut("{id}")]
@@ -63,18 +81,28 @@ namespace Presentation
 			if (temp != null)
 				return Ok();
 			else 
-				return NotFound();
+				return NotFound("الوصي غير موجود.");
 		}
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteGuardian(string id)
 		{
-			var guardian = await _guardianService.DeleteGuardianAsync(id);
-			if(guardian != null)
-			return Ok();
+			var existing = await _guardianService.GetGuardianByIdAsync(id);
+			if (existing == null)
+			{
+				return NotFound("الوصي غير موجود أو تم حذفه مسبقاً.");
+			}
 
+			if (existing.PeopleUnderGuardianship != null && existing.PeopleUnderGuardianship.Count > 0)
+			{
+				return BadRequest("لا يمكن حذف الوصي لوجود أيتام مسجلين تحت وصايته.");
+			}
+
+			var guardian = await _guardianService.DeleteGuardianAsync(id);
+			if (guardian != null)
+				return Ok();
 			else 
-				return NotFound();
+				return NotFound("الوصي غير موجود أو تم حذفه مسبقاً.");
 		}
 
 
