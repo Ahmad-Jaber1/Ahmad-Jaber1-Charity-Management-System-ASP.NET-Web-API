@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using Models.DTO;
 using Repository.Interfaces;
@@ -7,8 +7,11 @@ namespace Repository
 {
 	public class ReceiptRepo : BasicRepo<Receipt>, IReceiptRepo
 	{
+		private readonly CharityDbContex _dbContext;
+
 		public ReceiptRepo(CharityDbContex dbContext) : base(dbContext)
 		{
+			_dbContext = dbContext;
 		}
 
 		public async Task<List<GetReceiptDto>> GetReceiptsAsync()
@@ -63,8 +66,28 @@ namespace Repository
 
 		public async Task AddReceiptAsync(Receipt receipt)
 		{
-			Add(receipt);
-			await SaveChangeAsync();
+			if (receipt.ReceiptNO > 0)
+			{
+				using var transaction = await _dbContext.Database.BeginTransactionAsync();
+				try
+				{
+					await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Receipts ON;");
+					Add(receipt);
+					await SaveChangeAsync();
+					await _dbContext.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT Receipts OFF;");
+					await transaction.CommitAsync();
+				}
+				catch
+				{
+					await transaction.RollbackAsync();
+					throw;
+				}
+			}
+			else
+			{
+				Add(receipt);
+				await SaveChangeAsync();
+			}
 		}
 
 		public async Task UpdateReceiptAsync(Receipt receipt)

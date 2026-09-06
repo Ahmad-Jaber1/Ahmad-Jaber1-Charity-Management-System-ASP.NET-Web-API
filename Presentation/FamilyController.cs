@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models;
@@ -54,9 +54,20 @@ namespace Presentation
 		[HttpPost]
 		public async Task<IActionResult> AddFamily(Family family)
 		{
-			await _familyService.AddFamilyAsync(family);
+			if (string.IsNullOrWhiteSpace(family.Name))
+			{
+				return BadRequest("يرجى إدخال اسم الأسرة.");
+			}
 
-			return Ok();
+			try
+			{
+				await _familyService.AddFamilyAsync(family);
+				return Ok(new { familyId = family.FamilyId });
+			}
+			catch (Exception)
+			{
+				return BadRequest("تعذر إضافة الأسرة. يرجى التحقق من صحة البيانات.");
+			}
 		}
 
 		[HttpPut("{id}")]
@@ -74,8 +85,8 @@ namespace Presentation
 		{
 			var family = await _familyService.DeleteFamilyAsync(id);
 
-			if (family == null) return NotFound();
-			else if (family.FamilyId == 0) return BadRequest("Cannot delete Family because they have Assistances.");
+			if (family == null) return NotFound("الأسرة غير موجودة أو تم حذفها مسبقاً.");
+			else if (family.FamilyId == 0) return BadRequest("لا يمكن حذف الأسرة لوجود مساعدات مسجلة لها.");
 			else return Ok();
 		}
 

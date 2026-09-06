@@ -119,7 +119,10 @@ namespace Charity
 			}
 
 			// HTTP request pipeline
-			app.UseHttpsRedirection();
+			if (!app.Environment.IsDevelopment())
+			{
+				app.UseHttpsRedirection();
+			}
 
 			app.UseAuthentication();
 			app.UseAuthorization();

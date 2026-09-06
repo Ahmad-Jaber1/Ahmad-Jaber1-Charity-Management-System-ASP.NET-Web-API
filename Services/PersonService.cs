@@ -1,4 +1,4 @@
-﻿using Models;
+using Models;
 using Models.DTO;
 using Repository.Interfaces;
 using Services.Interfaces;
@@ -38,7 +38,18 @@ namespace Services
 		}
 
 		public async Task AddPersonAsync(Person person)
-		{ 
+		{
+			if (person.FamilyId <= 0)
+			{
+				person.FamilyId = null;
+			}
+			if (string.IsNullOrWhiteSpace(person.GuardianId))
+			{
+				person.GuardianId = null;
+			}
+			person.Family = null;
+			person.Guardian = null;
+
 			await _personRepo.AddPersonAsync(person);
 		}
 
@@ -54,8 +65,8 @@ namespace Services
 				SecondName = orphan.SecondName,
 				ThirdName = orphan.ThirdName,
 				EducationalLevel = orphan.EducationalLevel,
-				GuardianId = orphan.GuardianId,
-				FamilyId = orphan.FamilyId,
+				GuardianId = string.IsNullOrWhiteSpace(orphan.GuardianId) ? null : orphan.GuardianId,
+				FamilyId = orphan.FamilyId > 0 ? orphan.FamilyId : null,
 				Job = orphan.Job,
 				PhoneNumber = orphan.PhoneNumber,
 				NumberOfFamilyMembers = orphan.NumberOfFamilyMembers,
@@ -63,8 +74,6 @@ namespace Services
 				IsOrphan = true,
 				IsWidow = false,
 				IsPartOfFamily = orphan.IsPartOfFamily
-
-
 			};
 
 			await _personRepo.AddPersonAsync(person);
@@ -82,8 +91,8 @@ namespace Services
 				SecondName = widow.SecondName,
 				ThirdName = widow.ThirdName,
 				EducationalLevel = widow.EducationalLevel,
-				GuardianId = widow.GuardianId,
-				FamilyId = widow.FamilyId,
+				GuardianId = string.IsNullOrWhiteSpace(widow.GuardianId) ? null : widow.GuardianId,
+				FamilyId = widow.FamilyId > 0 ? widow.FamilyId : null,
 				Job = widow.Job,
 				PhoneNumber = widow.PhoneNumber,
 				NumberOfFamilyMembers = widow.NumberOfFamilyMembers,
@@ -91,8 +100,6 @@ namespace Services
 				IsOrphan = false,
 				IsWidow = true ,
 				IsPartOfFamily = widow.IsPartOfFamily
-
-
 			};
 
 			await _personRepo.AddPersonAsync(person);
@@ -110,7 +117,7 @@ namespace Services
 				SecondName = personInFamily.SecondName,
 				ThirdName = personInFamily.ThirdName,
 				EducationalLevel = personInFamily.EducationalLevel,
-				GuardianId = personInFamily.GuardianId,
+				GuardianId = string.IsNullOrWhiteSpace(personInFamily.GuardianId) ? null : personInFamily.GuardianId,
 				
 				Job = personInFamily.Job,
 				PhoneNumber = personInFamily.PhoneNumber,
@@ -167,8 +174,8 @@ namespace Services
 				person.IsOrphan = UpdatedPerson.IsOrphan;
 				person.IsHouseOwned = UpdatedPerson.IsHouseOwned;
 				person.Id = UpdatedPerson.Id;
-				person.FamilyId = UpdatedPerson.FamilyId;
-				person.GuardianId = UpdatedPerson.GuardianId;
+				person.FamilyId = UpdatedPerson.FamilyId > 0 ? UpdatedPerson.FamilyId : null;
+				person.GuardianId = string.IsNullOrWhiteSpace(UpdatedPerson.GuardianId) ? null : UpdatedPerson.GuardianId;
 
 				await _personRepo.UpdatePersonAsync(person);
 				return person;	
